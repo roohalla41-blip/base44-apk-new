@@ -11,21 +11,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: دریافت کد پروژه
+      - name: Checkout project
         uses: actions/checkout@v4
 
-      - name: تنظیم Java
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: ساخت APK
+      - name: Build APK
         run: |
           chmod +x ./gradlew
           ./gradlew assembleDebug
 
-      - name: ذخیره APK
+      - name: Save APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
