@@ -1,0 +1,33 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: دریافت کد
+        uses: actions/checkout@v4
+
+      - name: نصب Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: نصب Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: ساخت APK
+        run: gradle assembleDebug
+
+      - name: ذخیره APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Base44-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
