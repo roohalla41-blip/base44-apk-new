@@ -21,9 +21,10 @@ jobs:
           java-version: '17'
 
       - name: Setup Gradle
-        
-- name: Build APK
-  run: gradle assembleDebug
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
       - name: Build APK
         run: gradle assembleDebug
 
