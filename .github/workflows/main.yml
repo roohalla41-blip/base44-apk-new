@@ -11,23 +11,44 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: دریافت کد پروژه
         uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: تنظیم Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Make gradlew executable
+      - name: اجازه اجرای Gradle
         run: chmod +x ./gradlew
 
-      - name: Build APK
+      - name: ساخت APK
         run: ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: پیدا کردن فایل APK
+        run: |
+          echo "فایل‌های APK پیدا شده:"
+          find . -type f -name "*.apk" -print
+
+      - name: آماده‌سازی APK برای آپلود
+        run: |
+          mkdir -p apk-output
+          APK_FILE=$(find . -type f -name "*.apk" | head -n 1)
+
+          if [ -z "$APK_FILE" ]; then
+            echo "خطا: هیچ فایل APK پیدا نشد."
+            exit 1
+          fi
+
+          echo "APK پیدا شد:"
+          echo "$APK_FILE"
+
+          cp "$APK_FILE" apk-output/app-debug.apk
+
+      - name: آپلود APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: apk-output/app-debug.apk
+          if-no-files-found: error
