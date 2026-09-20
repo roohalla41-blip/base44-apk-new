@@ -20,24 +20,43 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: اجازه اجرای Gradle
-        run: chmod +x ./gradlew
+      - name: بررسی ساختار پروژه
+        run: |
+          echo "مسیر فعلی:"
+          pwd
+          echo ""
+          echo "فایل‌های اصلی پروژه:"
+          find . -maxdepth 3 -type f | sort | head -n 200
+
+      - name: بررسی Gradle
+        run: |
+          if [ ! -f "./gradlew" ]; then
+            echo "خطا: فایل gradlew در ریشه پروژه پیدا نشد."
+            echo "فایل‌های موجود:"
+            find . -maxdepth 3 -type f -name "gradlew" -o -name "build.gradle" -o -name "build.gradle.kts"
+            exit 1
+          fi
+
+          chmod +x ./gradlew
+          ./gradlew --version
 
       - name: ساخت APK
-        run: ./gradlew assembleDebug
-
-      - name: پیدا کردن فایل APK
         run: |
-          echo "فایل‌های APK پیدا شده:"
+          ./gradlew assembleDebug --stacktrace
+
+      - name: پیدا کردن APK
+        run: |
+          echo "جستجوی فایل‌های APK..."
           find . -type f -name "*.apk" -print
 
-      - name: آماده‌سازی APK برای آپلود
+      - name: آماده‌سازی APK
         run: |
           mkdir -p apk-output
+
           APK_FILE=$(find . -type f -name "*.apk" | head -n 1)
 
           if [ -z "$APK_FILE" ]; then
-            echo "خطا: هیچ فایل APK پیدا نشد."
+            echo "خطا: APK ساخته نشد و هیچ فایل APK پیدا نشد."
             exit 1
           fi
 
@@ -45,6 +64,8 @@ jobs:
           echo "$APK_FILE"
 
           cp "$APK_FILE" apk-output/app-debug.apk
+
+          echo "APK برای آپلود آماده شد."
 
       - name: آپلود APK
         uses: actions/upload-artifact@v4
